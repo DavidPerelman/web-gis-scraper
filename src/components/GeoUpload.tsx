@@ -4,7 +4,10 @@ import { useState } from "react";
 
 export default function GeoUpload() {
   const [file, setFile] = useState<File | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploaded = e.target.files?.[0] || null;
@@ -12,24 +15,36 @@ export default function GeoUpload() {
   };
 
   const handleSubmit = async () => {
+    setStatus("loading");
+
     if (!file) {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
 
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/upload-polygon`,
-      {
-        method: "POST",
-        body: formData,
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/upload-polygon`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error(`Server error: ${res.status}`);
       }
-    );
 
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    window.open(url, "_blank");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      setDownloadUrl(url);
+      setStatus("success");
+    } catch (err) {
+      console.error(err);
+      setStatus("error");
+    }
   };
 
   return (
@@ -41,7 +56,24 @@ export default function GeoUpload() {
       >
         Upload
       </button>
-      {message && <pre className="text-sm bg-gray-100 p-2">{message}</pre>}
+      {status === "loading" && <p className="text-blue-600">הבקשה בתהליך...</p>}
+      {status === "success" && (
+        <div className="text-green-600 space-y-2">
+          <p>✅ הבקשה הסתיימה בהצלחה</p>
+          {downloadUrl && (
+            <a
+              href={downloadUrl}
+              download
+              className="inline-block px-4 py-2 bg-green-600 text-white rounded"
+            >
+              הורד קובץ
+            </a>
+          )}
+        </div>
+      )}
+      {status === "error" && (
+        <p className="text-red-600">❌ אירעה שגיאה במהלך העלאת הקובץ</p>
+      )}
     </div>
   );
 }
