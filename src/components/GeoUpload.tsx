@@ -34,11 +34,7 @@ export default function GeoUpload() {
 
   return (
     <div className="space-y-4">
-      <input
-        type="file"
-        accept=".zip,.geojson,.json,.shp"
-        onChange={handleFileChange}
-      />
+      <input type="file" accept=".zip" onChange={handleFileChange} />
       <button
         className="px-4 py-2 bg-blue-600 text-white rounded"
         onClick={handleSubmit}
