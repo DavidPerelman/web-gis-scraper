@@ -1,5 +1,9 @@
 "use client";
 
 export default function GeoUpload() {
-  return <div>GeoUpload</div>;
+  return (
+    <div>
+      <input type="file" accept=".zip,.geojson,.json,.shp" />
+    </div>
+  );
 }
