@@ -27,8 +27,9 @@ export default function GeoUpload() {
       }
     );
 
-    const data = await res.json();
-    setMessage(JSON.stringify(data));
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
   };
 
   return (
